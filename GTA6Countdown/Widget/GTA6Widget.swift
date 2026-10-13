@@ -108,32 +108,21 @@ struct ArtBackground: View {
     let family: WidgetFamily
     let dimming: Double
 
-    private let aspect: CGFloat = 2000.0 / 1133.0
-
     var body: some View {
-        GeometryReader { geo in
-            // Small widget is square, so zoom in on Lucia & Jason; everything else shows the full art.
-            let zoom: CGFloat = family == .systemSmall ? 1.6 : 1.0
-            let focus = family == .systemSmall ? CGPoint(x: 0.27, y: 0.38) : CGPoint(x: 0.5, y: 0.5)
-            let w = max(geo.size.width, geo.size.height * aspect) * zoom
-            let h = w / aspect
-            let x = min(0, max(geo.size.width - w, geo.size.width / 2 - focus.x * w))
-            let y = min(0, max(geo.size.height - h, geo.size.height / 2 - focus.y * h))
-
-            ZStack(alignment: .topLeading) {
-                Image("Background")
-                    .resizable()
-                    .frame(width: w, height: h)
-                    .offset(x: x, y: y)
-                LinearGradient(
-                    stops: [
-                        .init(color: .clear, location: 0.35),
-                        .init(color: Color(red: 0.04, green: 0.01, blue: 0.13).opacity(dimming), location: 1.0),
-                    ],
-                    startPoint: .top, endPoint: .bottom)
-            }
-            .frame(width: geo.size.width, height: geo.size.height)
-            .clipped()
+        ZStack {
+            // Small gets its own square crop of Lucia & Jason; the rest use the full art (frame trimmed).
+            Image(family == .systemSmall ? "BackgroundSmall" : "Background")
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity, maxHeight: .infinity,
+                       alignment: family == .systemMedium || family == .systemExtraLarge ? .top : .center)
+                .clipped()
+            LinearGradient(
+                stops: [
+                    .init(color: .clear, location: 0.35),
+                    .init(color: Color(red: 0.04, green: 0.01, blue: 0.13).opacity(dimming), location: 1.0),
+                ],
+                startPoint: .top, endPoint: .bottom)
         }
     }
 }
@@ -144,7 +133,7 @@ struct CountdownView: View {
 
     var body: some View {
         let m = Metrics(family)
-        HStack(alignment: .top, spacing: m.number * 0.12) {
+        HStack(alignment: .top, spacing: m.number * 0.2) {
             unit(parts.days, m.shortLabels ? "D" : "DAYS", m)
             colon(m)
             unit(parts.hours, m.shortLabels ? "H" : "HOURS", m)
@@ -174,7 +163,7 @@ struct CountdownView: View {
 
     private func colon(_ m: Metrics) -> some View {
         Text(":")
-            .font(.system(size: m.number * 0.85, weight: .heavy))
+            .font(.system(size: m.number * 0.7, weight: .heavy))
             .foregroundStyle(.white.opacity(0.7))
             .offset(y: -m.number * 0.06)
     }
