@@ -87,10 +87,10 @@ private struct Metrics {
 
     init(_ family: WidgetFamily) {
         switch family {
-        case .systemSmall:      self = Metrics(number: 34, label: 8,  body: 11, inset: 10, shortLabels: true)
-        case .systemMedium:     self = Metrics(number: 52, label: 9,  body: 13, inset: 14, shortLabels: false)
-        case .systemLarge:      self = Metrics(number: 66, label: 11, body: 17, inset: 18, shortLabels: false)
-        default:                self = Metrics(number: 92, label: 13, body: 20, inset: 22, shortLabels: false)
+        case .systemSmall:      self = Metrics(number: 32, label: 8,  body: 11, inset: 10, shortLabels: true)
+        case .systemMedium:     self = Metrics(number: 50, label: 9,  body: 13, inset: 14, shortLabels: false)
+        case .systemLarge:      self = Metrics(number: 64, label: 11, body: 17, inset: 18, shortLabels: false)
+        default:                self = Metrics(number: 90, label: 13, body: 20, inset: 22, shortLabels: false)
         }
     }
 
@@ -109,21 +109,23 @@ struct ArtBackground: View {
     let dimming: Double
 
     var body: some View {
-        ZStack {
-            // Small gets its own square crop of Lucia & Jason; the rest use the full art (frame trimmed).
-            Image(family == .systemSmall ? "BackgroundSmall" : "Background")
-                .resizable()
-                .scaledToFill()
-                .frame(maxWidth: .infinity, maxHeight: .infinity,
-                       alignment: family == .systemMedium || family == .systemExtraLarge ? .top : .center)
-                .clipped()
-            LinearGradient(
-                stops: [
-                    .init(color: .clear, location: 0.35),
-                    .init(color: Color(red: 0.04, green: 0.01, blue: 0.13).opacity(dimming), location: 1.0),
-                ],
-                startPoint: .top, endPoint: .bottom)
-        }
+        // Color.clear takes exactly the container's size; the image is only an overlay, so it can't
+        // push the layout wider/taller than the widget. Centered, then clipped.
+        Color.clear
+            .overlay(
+                Image(family == .systemSmall ? "BackgroundSmall" : "Background")
+                    .resizable()
+                    .scaledToFill()
+            )
+            .overlay(
+                LinearGradient(
+                    stops: [
+                        .init(color: .clear, location: 0.35),
+                        .init(color: Color(red: 0.04, green: 0.01, blue: 0.13).opacity(dimming), location: 1.0),
+                    ],
+                    startPoint: .top, endPoint: .bottom)
+            )
+            .clipped()
     }
 }
 
